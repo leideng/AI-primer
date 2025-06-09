@@ -1,3 +1,5 @@
+# see https://medium.com/data-science-in-your-pocket/tested-nvidia-h200-vs-h100-gpus-for-ai-the-winner-will-surprise-you-4bbf0b3cd62e
+
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import time
 
