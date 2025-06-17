@@ -1,0 +1,84 @@
+# prompt: list all pcie devices with pcie addresses and connections
+!lspci -vvv
+
+00:00.0 Host bridge: Intel Corporation 440FX - 82441FX PMC [Natoma] (rev 02)
+	Subsystem: Red Hat, Inc. Qemu virtual machine
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV+ VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap- 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	NUMA node: 0
+lspci: Unable to load libkmod resources: error -2
+
+00:01.0 ISA bridge: Intel Corporation 82371AB/EB/MB PIIX4 ISA (rev 03)
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV+ VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap- 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	NUMA node: 0
+
+00:01.3 Bridge: Intel Corporation 82371AB/EB/MB PIIX4 ACPI (rev 03)
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV+ VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx-
+	Status: Cap- 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin A routed to IRQ 9
+	NUMA node: 0
+
+00:03.0 Non-VGA unclassified device: Red Hat, Inc. Virtio SCSI
+	Subsystem: Red Hat, Inc. Device 0008
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV+ VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin A routed to IRQ 11
+	NUMA node: 0
+	Region 0: I/O ports at c040 [size=64]
+	Region 1: Memory at 81001000 (32-bit, non-prefetchable) [size=128]
+	Capabilities: [80] MSI-X: Enable+ Count=4 Masked-
+		Vector table: BAR=1 offset=00000008
+		PBA: BAR=1 offset=00000000
+	Kernel driver in use: virtio-pci
+
+00:04.0 3D controller: NVIDIA Corporation GA100 [A100 SXM4 40GB] (rev a1)
+	Subsystem: NVIDIA Corporation Device 134f
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV+ VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin A routed to IRQ 11
+	NUMA node: 0
+	Region 0: Memory at 80000000 (32-bit, non-prefetchable) [size=16M]
+	Region 1: Memory at 2000000000 (64-bit, prefetchable) [size=64G]
+	Region 3: Memory at 3000000000 (64-bit, prefetchable) [size=32M]
+	Capabilities: [60] MSI-X: Enable+ Count=6 Masked-
+		Vector table: BAR=0 offset=00b90000
+		PBA: BAR=0 offset=00ba0000
+	Capabilities: [6c] Power Management version 3
+		Flags: PMEClk- DSI- D1- D2- AuxCurrent=0mA PME(D0-,D1-,D2-,D3hot-,D3cold-)
+		Status: D0 NoSoftRst+ PME-Enable- DSel=0 DScale=0 PME-
+	Capabilities: [74] Vendor Specific Information: Len=08 <?>
+	Kernel driver in use: nvidia
+
+00:05.0 Ethernet controller: Red Hat, Inc. Virtio network device
+	Subsystem: Red Hat, Inc. Device 0001
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV+ VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx+
+	Latency: 0
+	Interrupt: pin A routed to IRQ 10
+	NUMA node: 0
+	Region 0: I/O ports at c000 [size=64]
+	Region 1: Memory at 81000000 (32-bit, non-prefetchable) [size=512]
+	Capabilities: [80] MSI-X: Enable+ Count=25 Masked-
+		Vector table: BAR=1 offset=00000008
+		PBA: BAR=1 offset=00000000
+	Kernel driver in use: virtio-pci
+
+00:06.0 Unclassified device [00ff]: Red Hat, Inc. Virtio RNG
+	Subsystem: Red Hat, Inc. Device 0004
+	Control: I/O+ Mem+ BusMaster+ SpecCycle- MemWINV+ VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
+	Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort- <TAbort- <MAbort- >SERR- <PERR- INTx-
+	Latency: 0
+	Interrupt: pin A routed to IRQ 10
+	NUMA node: 0
+	Region 0: I/O ports at c080 [size=32]
+	Region 1: Memory at 81002000 (32-bit, non-prefetchable) [size=64]
+	Capabilities: [80] MSI-X: Enable+ Count=2 Masked-
+		Vector table: BAR=1 offset=00000008
+		PBA: BAR=1 offset=00000000
+	Kernel driver in use: virtio-pci
