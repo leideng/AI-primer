@@ -13,7 +13,7 @@ class SelfAttention:
     def __init__(self, d_model=512, h=8):
         self.d_model = d_model  # Model dimension
         self.h = h  # Number of attention heads
-        self.d_k = d_model // h  # Dimension of each head
+        self.d_k = 64  # Dimension of each head (fixed to 64)
         
         # Initialize random weights (in practice these would be learned)
         self.W_q = np.random.randn(d_model, d_model) / np.sqrt(d_model)

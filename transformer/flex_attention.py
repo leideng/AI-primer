@@ -12,7 +12,7 @@ class CustomMultiheadAttention(nn.Module):
         super().__init__()
         self.embed_dim = embed_dim
         self.num_heads = num_heads
-        self.head_dim = embed_dim // num_heads
+        self.head_dim = 64  # Dimension of each head (fixed to 64)
         assert self.head_dim * num_heads == embed_dim, "embed_dim must be divisible by num_heads"
         
         self.q_proj = nn.Linear(embed_dim, embed_dim)
@@ -82,7 +82,7 @@ def main():
     # Test parameters
     batch_size = 4
     seq_len = 512
-    embed_dim = 512
+    embed_dim = 512  # Must be divisible by num_heads * head_dim (8 * 64 = 512)
     num_heads = 8
     num_runs = 100
     
