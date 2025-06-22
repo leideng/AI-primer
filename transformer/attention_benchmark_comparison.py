@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Attention Implementation Comparison: Simple vs Flash vs Flex
-Benchmarks three attention implementations with consistent 64-dimension key/value
+Attention Implementation Comparison: Simple vs Flash vs Flex (Inference Focus)
+Benchmarks three attention implementations for inference with consistent 64-dimension key/value
 """
 
 import torch
@@ -114,7 +114,7 @@ class FlexAttentionWrapper(nn.Module):
         return self.out_proj(attn_output)
 
 def benchmark_attention(attention_module, x, num_runs=100, warmup_runs=10):
-    """Benchmark attention module performance"""
+    """Benchmark attention module performance for inference"""
     device = x.device
     
     # Warmup runs
@@ -126,7 +126,7 @@ def benchmark_attention(attention_module, x, num_runs=100, warmup_runs=10):
     if device.type == 'cuda':
         torch.cuda.synchronize()
     
-    # Benchmark runs
+    # Benchmark runs (inference only)
     start_time = time.time()
     with torch.no_grad():
         for _ in range(num_runs):
@@ -142,9 +142,9 @@ def benchmark_attention(attention_module, x, num_runs=100, warmup_runs=10):
     return avg_time, output
 
 def compare_attention_implementations():
-    """Compare all three attention implementations"""
+    """Compare all three attention implementations for inference"""
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Attention Implementation Comparison on {device}")
+    print(f"Attention Implementation Comparison - Inference Focus on {device}")
     print("=" * 70)
     
     # Test parameters
@@ -156,6 +156,7 @@ def compare_attention_implementations():
     
     print(f"Configuration: batch_size={batch_size}, seq_len={seq_len}, embed_dim={embed_dim}, num_heads={num_heads}")
     print(f"Head dimension: 64 (fixed)")
+    print(f"Mode: Inference only (no gradients)")
     print()
     
     # Create test input
@@ -176,7 +177,7 @@ def compare_attention_implementations():
     
     # Benchmark each implementation
     for name, module in implementations:
-        print(f"Benchmarking {name}...")
+        print(f"Benchmarking {name} for inference...")
         try:
             time_taken, output = benchmark_attention(module, x, num_runs)
             results[name] = {
@@ -195,7 +196,7 @@ def compare_attention_implementations():
             }
     
     print("\n" + "=" * 70)
-    print("Performance Comparison")
+    print("Inference Performance Comparison")
     print("=" * 70)
     
     # Find the fastest successful implementation
@@ -204,26 +205,32 @@ def compare_attention_implementations():
     if len(successful_results) > 1:
         fastest_time = min(v['time'] for v in successful_results.values())
         
-        print(f"{'Implementation':<20} {'Time (ms)':<12} {'Speedup':<12} {'Memory (MB)':<12}")
-        print("-" * 60)
+        print(f"{'Implementation':<20} {'Time (ms)':<12} {'Speedup':<12} {'Memory (MB)':<12} {'Tokens/sec':<12}")
+        print("-" * 70)
         
         for name, result in results.items():
             if result['success']:
                 time_ms = result['time'] * 1000
                 speedup = result['time'] / fastest_time
                 memory_mb = 0
+                tokens_per_sec = 0
+                
                 if device.type == 'cuda':
                     torch.cuda.reset_peak_memory_stats()
                     _ = result['output']
                     memory_mb = torch.cuda.max_memory_allocated() / 1024**2
                 
-                print(f"{name:<20} {time_ms:<12.3f} {speedup:<12.2f}x {memory_mb:<12.1f}")
+                # Calculate tokens per second
+                total_tokens = batch_size * seq_len
+                tokens_per_sec = total_tokens / result['time']
+                
+                print(f"{name:<20} {time_ms:<12.3f} {speedup:<12.2f}x {memory_mb:<12.1f} {tokens_per_sec:<12.0f}")
             else:
-                print(f"{name:<20} {'Failed':<12} {'N/A':<12} {'N/A':<12}")
+                print(f"{name:<20} {'Failed':<12} {'N/A':<12} {'N/A':<12} {'N/A':<12}")
     
     # Output comparison
     print("\n" + "=" * 70)
-    print("Output Comparison")
+    print("Output Comparison (Inference)")
     print("=" * 70)
     
     successful_outputs = [v['output'] for v in results.values() if v['success']]
@@ -253,10 +260,10 @@ def compare_attention_implementations():
     
     # Test with different sequence lengths
     print("=" * 70)
-    print("Performance across sequence lengths")
+    print("Inference Performance across sequence lengths")
     print("=" * 70)
     
-    seq_lengths = [128, 256, 512, 1024]
+    seq_lengths = [128, 256, 512, 1024, 2048]
     for seq_len in seq_lengths:
         print(f"\nSequence length: {seq_len}")
         x_test = torch.randn(batch_size, seq_len, embed_dim, device=device)
@@ -264,7 +271,8 @@ def compare_attention_implementations():
         for name, module in implementations:
             try:
                 time_taken, _ = benchmark_attention(module, x_test, num_runs=50)
-                print(f"  {name}: {time_taken*1000:.3f} ms")
+                tokens_per_sec = (batch_size * seq_len) / time_taken
+                print(f"  {name}: {time_taken*1000:.3f} ms ({tokens_per_sec:.0f} tokens/sec)")
             except:
                 print(f"  {name}: Failed")
 

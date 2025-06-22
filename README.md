@@ -10,10 +10,10 @@ This repository records my own journey to learn AI. It includdes the following c
 ### Attention Implementations
 - `transformer/flex_attention.py`: Custom multihead attention with performance benchmarking
 - `transformer/flash_attention_comparison.py`: FlashAttention vs FlexAttention comparison
-- `transformer/attention_benchmark_comparison.py`: **NEW** - Comprehensive comparison of Simple vs Flash vs Flex Attention
+- `transformer/attention_benchmark_comparison.py`: **NEW** - Comprehensive comparison of Simple vs Flash vs Flex Attention (Inference Focus)
 - `transformer/test_flash_vs_flex.py`: Test script for attention comparison
 - `pytorch/flex_attn_test.py`: PyTorch flex attention test with 64-dimension key/value
-- `pytorch/simple_flex_test.py`: **NEW** - Simple FlexAttention test (< 50 lines)
+- `pytorch/simple_flex_test.py`: **NEW** - Simple FlexAttention test for inference (< 50 lines)
 
 ### Encoder
 ### Decoder
@@ -65,8 +65,10 @@ All attention implementations use a fixed 64-dimension for key and value tensors
 3. **FlexAttention**: PyTorch's flexible attention implementation with score modification
 
 ### Comprehensive Benchmarking
+- **Inference Performance**: Optimized for inference workloads (no gradient computation)
 - Performance comparison across different sequence lengths
 - Memory usage analysis
 - Output correctness validation
 - Speedup calculations relative to fastest implementation
+- **Tokens per second** metrics for throughput analysis
 
