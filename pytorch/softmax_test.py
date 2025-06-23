@@ -18,14 +18,21 @@ import torch.nn.functional as F
 # The output of the custom implementation is expected to be very close to the built-in softmax
 # function, with a very small difference due to numerical precision.
 # Example tensor
-x = torch.randn(5, 10)
-output = F.softmax(x, 1)
+#list_data = [[1, 2, -1, -2], [3, 4, -4, -3]]
+list_data = [[100, 200, -100, -200], [300, 400, -400, -300]]
+#x = torch.randn(2, 4)
+x = torch.tensor(list_data, dtype=torch.float32)
+print(f"x:\n{x}")
+output = F.softmax(x, dim=1)
+#print(f"Softmax output: {output}")
+print(f"Softmax output:\n{torch.round(output * 1000) / 1000}")
 
 # Custom implementation of softmax using the log-sum-exp trick
 maxes = torch.max(x, 1, keepdim=True)[0]
 x_exp = torch.exp(x-maxes)
 x_exp_sum = torch.sum(x_exp, 1, keepdim=True)
 output_custom = x_exp/x_exp_sum
+print(f"Customized softmax output:\n{torch.round(output_custom * 1000) / 1000}")
 
 # Verify that the custom implementation matches the built-in softmax
 # This will print True if they are close enough, and the sum of absolute differences
