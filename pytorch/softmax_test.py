@@ -18,8 +18,8 @@ import torch.nn.functional as F
 # The output of the custom implementation is expected to be very close to the built-in softmax
 # function, with a very small difference due to numerical precision.
 # Example tensor
-#list_data = [[1, 2, -1, -2], [3, 4, -4, -3]]
-list_data = [[100, 200, -100, -200], [300, 400, -400, -300]]
+list_data = [[1, 2, -1, -2], [3, 4, -4, -3]]
+#list_data = [[100, 200, -100, -200], [300, 400, -400, -300]]
 #x = torch.randn(2, 4)
 x = torch.tensor(list_data, dtype=torch.float32)
 print(f"x:\n{x}")
