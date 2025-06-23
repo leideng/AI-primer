@@ -29,7 +29,10 @@ def scaled_dot_product_attention(query, key, value, attn_mask=None, dropout_p=0.
         scores += attn_mask
 
     # Apply softmax to get attention weights
-    attn_weights = F.softmax(scores, dim=-1)
+    # Subtract max scores for numerical stability
+    # This is the log-sum-exp trick to prevent overflow in softmax
+    maxes = torch.max(scores, dim=-1, keepdim=True)[0]
+    attn_weights = F.softmax(scores-maxes, dim=-1)
 
     # Apply dropout to attention weights
     if dropout_p > 0.0:
@@ -42,16 +45,18 @@ def scaled_dot_product_attention(query, key, value, attn_mask=None, dropout_p=0.
 
 # Example usage
 if __name__ == "__main__":
-    batch_size = 1
-    num_heads = 1
+    batch_size = 20
+    num_heads = 4
     seq_len_q = 40
-    seq_len_k = 50
-    seq_len_v = 50
+    seq_len_k = 500
+    seq_len_v = 500
     embed_size_per_head = 128
 
-    q = torch.randn(batch_size, num_heads, seq_len_q, embed_size_per_head)
-    k = torch.randn(batch_size, num_heads, seq_len_k, embed_size_per_head)
-    v = torch.randn(batch_size, num_heads, seq_len_v, embed_size_per_head)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #torch.manual_seed(0)  # For reproducibility
+    q = torch.randn(batch_size, num_heads, seq_len_q, embed_size_per_head, device=device, dtype=torch.float32)
+    k = torch.randn(batch_size, num_heads, seq_len_k, embed_size_per_head,  device=device, dtype=torch.float32)
+    v = torch.randn(batch_size, num_heads, seq_len_v, embed_size_per_head,  device=device, dtype=torch.float32)
 
     start_time = time.time()
     my_output, my_scores, my_attn_weights = scaled_dot_product_attention(q, k, v, attn_mask=None, dropout_p=0.0)
@@ -70,18 +75,24 @@ if __name__ == "__main__":
     print("Attention scores shape:", my_scores.shape)
     print("Attention Weights shape:", my_attn_weights.shape)
 
+    # Print the first few values of the outputs for comparison
+    items = 5  
+    print("First", items, "values of the outputs:") 
+    print("Custom implementation output (first", items, "values):", my_output.view(-1)[:items])
+    print("PyTorch built-in output (first", items, "values):", pytorch_output.view(-1)[:items])
+
     # Print the shapes of the PyTorch built-in outputs
     # Note: PyTorch's built-in function returns only the output, not the scores or attention weights
     print("PyTorch built-in implementation shapes:")
     print("Output shape:", pytorch_output.shape)
 
     # Verify the outputs    
-    print("Outputs are close or not:", torch.allclose(my_output, pytorch_output))
-    print("Difference in outputs:", torch.sum(torch.abs(my_output - pytorch_output)))
+    print("Outputs are close or not:", torch.allclose(my_output, pytorch_output, rtol=1e-3, atol=1e-5))
+    print("Sum Difference in outputs:", torch.sum(torch.abs(my_output - pytorch_output)))
+    print("Ave Difference in outputs:", torch.mean(torch.abs(my_output - pytorch_output)))
     
     if not torch.allclose(my_output, pytorch_output):
         print("Outputs are not close enough!")
-        print("Difference in outputs:", torch.sum(torch.abs(my_output - pytorch_output)))
     else:
         print("Outputs are close enough!")  
         print("All checks passed!")
