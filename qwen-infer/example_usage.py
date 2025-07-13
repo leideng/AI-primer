@@ -11,7 +11,7 @@ import time
 # This line sets the file path to the Qwen3 model directory.
 # r means that this is a raw string, meaning that
 # Backslashes (\) are treated as literal characters, not escape sequences
-my_model_path = r"D:\models\qwen3-0.6B"
+__lei_model_path__ = r"D:\models\qwen3-0.6B"
 
 def example_basic_usage():
     """Basic usage example."""
@@ -19,7 +19,7 @@ def example_basic_usage():
     
     # Initialize inference with a smaller model for faster loading
     inference = Qwen3Inference(
-        model_name_or_path=my_model_path,  # Small model for demo
+        model_name_or_path=__lei_model_path__,  # Small model for demo
         device="auto",
         torch_dtype="auto"
     )
@@ -43,7 +43,7 @@ def example_streaming():
     print("=== Streaming Generation Example ===")
     
     inference = Qwen3Inference(
-        model_name_or_path=my_model_path,
+        model_name_or_path=__lei_model_path__,
         device="auto",
         torch_dtype="auto"
     )
@@ -68,7 +68,7 @@ def example_batch_generation():
     print("=== Batch Generation Example ===")
     
     inference = Qwen3Inference(
-        model_name_or_path=my_model_path,
+        model_name_or_path=__lei_model_path__,
         device="auto",
         torch_dtype="auto"
     )
@@ -147,7 +147,7 @@ def example_memory_optimization():
     
     try:
         inference = Qwen3Inference(
-            model_name_or_path=my_model_path,
+            model_name_or_path=__lei_model_path__,
             device="auto",
             torch_dtype="auto",
             load_in_8bit=True,  # Use 8-bit quantization
@@ -179,7 +179,7 @@ def example_custom_model_path():
     # You would need to have downloaded the model locally first
     
     # Example path (you would need to adjust this to your actual model path)
-    local_model_path = my_model_path
+    local_model_path = __lei_model_path__
     
     try:
         inference = Qwen3Inference(
@@ -212,7 +212,7 @@ def example_torch_compile():
     # Test without compilation
     print("Testing without torch.compile...")
     inference_no_compile = Qwen3Inference(
-        model_name_or_path=my_model_path,
+        model_name_or_path=__lei_model_path__,
         device="auto",
         torch_dtype="auto",
         use_compile=False
@@ -237,7 +237,7 @@ def example_torch_compile():
     # Test with compilation
     print("Testing with torch.compile...")
     inference_with_compile = Qwen3Inference(
-        model_name_or_path=my_model_path,
+        model_name_or_path=__lei_model_path__,
         device="auto",
         torch_dtype="auto",
         use_compile=True,
@@ -273,7 +273,7 @@ def example_compile_modes():
         print(f"Testing mode: {mode}")
         try:
             inference = Qwen3Inference(
-                model_name_or_path=my_model_path,
+                model_name_or_path=__lei_model_path__,
                 device="auto",
                 torch_dtype="auto",
                 use_compile=True,

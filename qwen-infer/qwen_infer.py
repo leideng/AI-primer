@@ -19,13 +19,14 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig
 import warnings
 warnings.filterwarnings("ignore")
 
+__lei_model_path__ = r"D:\models\qwen3-0.6B"
 
 class Qwen3Inference:
     """Qwen3 inference class with various optimization options."""
     
     def __init__(
         self,
-        model_name_or_path: str,
+        model_name_or_path: str = __lei_model_path__,
         device: str = "auto",
         torch_dtype: str = "auto",
         use_flash_attention: bool = True,
@@ -343,7 +344,7 @@ class Qwen3Inference:
 def main():
     """Main function for command-line usage."""
     parser = argparse.ArgumentParser(description="Qwen3 Inference")
-    parser.add_argument("--model", type=str, default="Qwen/Qwen2.5-7B-Instruct", 
+    parser.add_argument("--model", type=str, default=r"D:\models\qwen3-0.6B", 
                        help="Model name or path")
     parser.add_argument("--prompt", type=str, default="Hello, how are you?", 
                        help="Input prompt")
