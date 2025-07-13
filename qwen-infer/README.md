@@ -43,7 +43,7 @@ from qwen_infer import Qwen3Inference
 
 # Initialize inference
 inference = Qwen3Inference(
-    model_name_or_path="Qwen/Qwen2.5-7B-Instruct",
+    model_name_or_path="Qwen/Qwen3-8B",
     device="auto"
 )
 
@@ -57,7 +57,7 @@ print(result)
 
 # With torch.compile for faster inference
 inference_fast = Qwen3Inference(
-    model_name_or_path="Qwen/Qwen2.5-7B-Instruct",
+    model_name_or_path="Qwen/Qwen3-8B",
     device="auto",
     use_compile=True,
     compile_mode="default"
@@ -74,7 +74,7 @@ python qwen_infer.py --prompt "Hello, how are you?"
 
 # With custom parameters
 python qwen_infer.py \
-    --model "Qwen/Qwen2.5-7B-Instruct" \
+    --model "Qwen/Qwen3-8B" \
     --prompt "Write a short story about a robot." \
     --max_new_tokens 300 \
     --temperature 0.8 \
@@ -94,7 +94,7 @@ python qwen_infer.py --use_compile --compile_mode default --prompt "Hello, how a
 ```python
 from qwen_infer import Qwen3Inference
 
-inference = Qwen3Inference("Qwen/Qwen2.5-7B-Instruct")
+inference = Qwen3Inference("Qwen/Qwen3-8B")
 result = inference.generate("What is machine learning?")
 print(result)
 ```
@@ -102,7 +102,7 @@ print(result)
 ### 2. Streaming Generation
 
 ```python
-inference = Qwen3Inference("Qwen/Qwen2.5-7B-Instruct")
+inference = Qwen3Inference("Qwen/Qwen3-8B")
 result = inference.generate(
     prompt="Write a story about space exploration.",
     stream=True,
@@ -130,7 +130,7 @@ for prompt, result in zip(prompts, results):
 ```python
 # For large models with limited GPU memory
 inference = Qwen3Inference(
-    model_name_or_path="Qwen/Qwen2.5-72B-Instruct",
+    model_name_or_path="Qwen/Qwen3-235B-A22B",
     load_in_8bit=True,  # 8-bit quantization
     device="auto"
 )
@@ -140,14 +140,14 @@ inference = Qwen3Inference(
 
 ```python
 # Use a locally downloaded model
-inference = Qwen3Inference("./models/Qwen2.5-7B-Instruct")
+inference = Qwen3Inference("./models/Qwen3-8B")
 ```
 
 ## Command Line Options
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--model` | Model name or path | `Qwen/Qwen2.5-7B-Instruct` |
+| `--model` | Model name or path | `Qwen/Qwen3-8B` |
 | `--prompt` | Input prompt | `"Hello, how are you?"` |
 | `--max_new_tokens` | Maximum tokens to generate | `512` |
 | `--temperature` | Sampling temperature | `0.7` |
@@ -168,13 +168,13 @@ inference = Qwen3Inference("./models/Qwen2.5-7B-Instruct")
 
 ### Available Models
 
-- `Qwen/Qwen3-0.6B-Instruct` - Smallest model (0.6B parameters)
-- `Qwen/Qwen3-1.7B-Instruct` - Small model (1.7B parameters)
-- `Qwen/Qwen3-8B-Instruct` - Medium model (8B parameters)
-- `Qwen/Qwen3-14B-Instruct` - Large model (14B parameters)
-- `Qwen/Qwen3-32B-Instruct` - Huge model (32B parameters)
-- `Qwen/Qwen3-30B-A3B-Instruct` - Advanced model (30B parameters, A3B architecture)
-- `Qwen/Qwen3-235B-A22B-Instruct` - Massive model (235B parameters, A22B architecture)
+- `Qwen/Qwen3-0.6B` - Smallest model (0.6B parameters)
+- `Qwen/Qwen3-1.7B` - Small model (1.7B parameters)
+- `Qwen/Qwen3-8B` - Medium model (8B parameters)
+- `Qwen/Qwen3-14B` - Large model (14B parameters)
+- `Qwen/Qwen3-32B` - Huge model (32B parameters)
+- `Qwen/Qwen3-30B-A3B` - Advanced model (30B parameters, A3B architecture)
+- `Qwen/Qwen3-235B-A22B` - Massive model (235B parameters, A22B architecture)
 
 ### Model Selection Guide
 
