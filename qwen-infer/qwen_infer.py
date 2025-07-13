@@ -32,7 +32,9 @@ class Qwen3Inference:
         trust_remote_code: bool = True,
         load_in_8bit: bool = False,
         load_in_4bit: bool = False,
-        max_memory: Optional[Dict[str, str]] = None
+        max_memory: Optional[Dict[str, str]] = None,
+        use_compile: bool = False,
+        compile_mode: str = "default"
     ):
         """
         Initialize Qwen3 inference.
@@ -92,6 +94,16 @@ class Qwen3Inference:
         # Enable flash attention if requested
         if use_flash_attention and hasattr(self.model, "enable_flash_attention"):
             self.model.enable_flash_attention()
+        
+        # Apply torch.compile if requested
+        if use_compile:
+            print(f"Applying torch.compile with mode: {compile_mode}")
+            try:
+                self.model = torch.compile(self.model, mode=compile_mode)
+                print("torch.compile applied successfully!")
+            except Exception as e:
+                print(f"Warning: torch.compile failed: {e}")
+                print("Continuing without compilation...")
         
         print("Model loaded successfully!")
     
@@ -359,6 +371,11 @@ def main():
                        help="Load model in 4-bit precision")
     parser.add_argument("--no_flash_attention", action="store_true", 
                        help="Disable flash attention")
+    parser.add_argument("--use_compile", action="store_true", 
+                       help="Enable torch.compile for faster inference")
+    parser.add_argument("--compile_mode", type=str, default="default", 
+                       choices=["default", "reduce-overhead", "max-autotune"],
+                       help="torch.compile mode (default, reduce-overhead, max-autotune)")
     
     args = parser.parse_args()
     
@@ -369,7 +386,9 @@ def main():
         torch_dtype=args.torch_dtype,
         use_flash_attention=not args.no_flash_attention,
         load_in_8bit=args.load_in_8bit,
-        load_in_4bit=args.load_in_4bit
+        load_in_4bit=args.load_in_4bit,
+        use_compile=args.use_compile,
+        compile_mode=args.compile_mode
     )
     
     if args.batch:

@@ -10,6 +10,7 @@ A comprehensive Python program for running inference with Qwen3 models, supporti
 - **Streaming Generation**: Real-time text generation with streaming output
 - **Batch Processing**: Efficient batch inference for multiple prompts
 - **Flash Attention**: Optional flash attention for improved performance
+- **Torch Compile**: Optional torch.compile for faster inference
 - **Flexible Parameters**: Comprehensive generation parameter control
 - **Command Line Interface**: Easy-to-use CLI for quick inference
 
@@ -53,6 +54,16 @@ result = inference.generate(
     temperature=0.7
 )
 print(result)
+
+# With torch.compile for faster inference
+inference_fast = Qwen3Inference(
+    model_name_or_path="Qwen/Qwen2.5-7B-Instruct",
+    device="auto",
+    use_compile=True,
+    compile_mode="default"
+)
+result = inference_fast.generate("Write a story about AI.")
+print(result)
 ```
 
 ### Command Line Usage
@@ -71,6 +82,9 @@ python qwen_infer.py \
 
 # Batch mode
 python qwen_infer.py --batch
+
+# With torch.compile for faster inference
+python qwen_infer.py --use_compile --compile_mode default --prompt "Hello, how are you?"
 ```
 
 ## Usage Examples
@@ -147,6 +161,8 @@ inference = Qwen3Inference("./models/Qwen2.5-7B-Instruct")
 | `--load_in_8bit` | Load model in 8-bit | `False` |
 | `--load_in_4bit` | Load model in 4-bit | `False` |
 | `--no_flash_attention` | Disable flash attention | `False` |
+| `--use_compile` | Enable torch.compile for faster inference | `False` |
+| `--compile_mode` | torch.compile mode (default, reduce-overhead, max-autotune) | `default` |
 
 ## Model Options
 
@@ -202,6 +218,12 @@ inference = Qwen3Inference("./models/Qwen2.5-7B-Instruct")
 4. **Set memory limits** for multi-GPU setups:
    ```python
    max_memory={"0": "40GB", "1": "40GB"}
+   ```
+
+5. **Use torch.compile** for faster inference:
+   ```python
+   use_compile=True,
+   compile_mode="default"  # or "reduce-overhead", "max-autotune"
    ```
 
 ## Examples

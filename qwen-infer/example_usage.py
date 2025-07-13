@@ -205,6 +205,101 @@ def example_custom_model_path():
     print()
 
 
+def example_torch_compile():
+    """Example with torch.compile for faster inference."""
+    print("=== Torch Compile Example ===")
+    
+    # Test without compilation
+    print("Testing without torch.compile...")
+    inference_no_compile = Qwen3Inference(
+        model_name_or_path=my_model_path,
+        device="auto",
+        torch_dtype="auto",
+        use_compile=False
+    )
+    
+    prompt = "Explain the benefits of renewable energy in one paragraph."
+    print(f"Prompt: {prompt}")
+    
+    start_time = time.time()
+    result_no_compile = inference_no_compile.generate(
+        prompt=prompt,
+        max_new_tokens=100,
+        temperature=0.7
+    )
+    end_time = time.time()
+    time_without_compile = end_time - start_time
+    
+    print(f"Without compilation: {time_without_compile:.2f} seconds")
+    print(f"Result: {result_no_compile}")
+    print()
+    
+    # Test with compilation
+    print("Testing with torch.compile...")
+    inference_with_compile = Qwen3Inference(
+        model_name_or_path=my_model_path,
+        device="auto",
+        torch_dtype="auto",
+        use_compile=True,
+        compile_mode="default"
+    )
+    
+    start_time = time.time()
+    result_with_compile = inference_with_compile.generate(
+        prompt=prompt,
+        max_new_tokens=100,
+        temperature=0.7
+    )
+    end_time = time.time()
+    time_with_compile = end_time - start_time
+    
+    print(f"With compilation: {time_with_compile:.2f} seconds")
+    print(f"Result: {result_with_compile}")
+    print()
+    
+    # Calculate speedup
+    speedup = time_without_compile / time_with_compile if time_with_compile > 0 else 1.0
+    print(f"Speedup: {speedup:.2f}x")
+    print()
+
+
+def example_compile_modes():
+    """Example showing different torch.compile modes."""
+    print("=== Torch Compile Modes Example ===")
+    
+    modes = ["default", "reduce-overhead", "max-autotune"]
+    
+    for mode in modes:
+        print(f"Testing mode: {mode}")
+        try:
+            inference = Qwen3Inference(
+                model_name_or_path=my_model_path,
+                device="auto",
+                torch_dtype="auto",
+                use_compile=True,
+                compile_mode=mode
+            )
+            
+            prompt = "Write a short poem about technology."
+            print(f"Prompt: {prompt}")
+            
+            start_time = time.time()
+            result = inference.generate(
+                prompt=prompt,
+                max_new_tokens=50,
+                temperature=0.8
+            )
+            end_time = time.time()
+            
+            print(f"Mode '{mode}' completed in {end_time - start_time:.2f} seconds")
+            print(f"Result: {result}")
+            print()
+            
+        except Exception as e:
+            print(f"Mode '{mode}' failed: {e}")
+            print()
+
+
 def main():
     """Run all examples."""
     print("Qwen3 Inference Examples")
@@ -212,11 +307,13 @@ def main():
     
     # Run examples
     #example_basic_usage()
-    example_streaming()
+    #example_streaming()
     #example_batch_generation()
     #example_different_parameters()
     #example_memory_optimization()
     #example_custom_model_path()
+    example_torch_compile()
+    example_compile_modes()
     
     print("All examples completed!")
 
