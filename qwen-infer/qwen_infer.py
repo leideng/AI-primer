@@ -15,7 +15,7 @@ import torch
 import argparse
 import time
 from typing import List, Optional, Dict, Any
-from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig, BitsAndBytesConfig
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -78,10 +78,23 @@ class Qwen3Inference:
             "torch_dtype": self.torch_dtype,
         }
         
-        if load_in_8bit:
-            model_kwargs["load_in_8bit"] = True
-        elif load_in_4bit:
-            model_kwargs["load_in_4bit"] = True
+        # Set up quantization config if requested
+        if load_in_8bit or load_in_4bit:
+            try:
+                if load_in_8bit:
+                    quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+                elif load_in_4bit:
+                    quantization_config = BitsAndBytesConfig(load_in_4bit=True)
+                
+                model_kwargs["quantization_config"] = quantization_config
+                print(f"Using {'8-bit' if load_in_8bit else '4-bit'} quantization")
+            except ImportError as e:
+                print(f"Warning: Quantization requires bitsandbytes. Install with: pip install -U bitsandbytes")
+                print(f"Error: {e}")
+                # Continue without quantization
+            except Exception as e:
+                print(f"Warning: Quantization failed: {e}")
+                # Continue without quantization
         
         if max_memory:
             model_kwargs["device_map"] = "auto"
@@ -476,16 +489,36 @@ def main():
     args = parser.parse_args()
     
     # Initialize inference
-    inference = Qwen3Inference(
-        model_name_or_path=args.model,
-        device=args.device,
-        torch_dtype=args.torch_dtype,
-        use_flash_attention=not args.no_flash_attention,
-        load_in_8bit=args.load_in_8bit,
-        load_in_4bit=args.load_in_4bit,
-        use_compile=args.use_compile,
-        compile_mode=args.compile_mode
-    )
+    try:
+        inference = Qwen3Inference(
+            model_name_or_path=args.model,
+            device=args.device,
+            torch_dtype=args.torch_dtype,
+            use_flash_attention=not args.no_flash_attention,
+            load_in_8bit=args.load_in_8bit,
+            load_in_4bit=args.load_in_4bit,
+            use_compile=args.use_compile,
+            compile_mode=args.compile_mode
+        )
+    except ImportError as e:
+        if args.load_in_8bit or args.load_in_4bit:
+            print(f"Quantization failed - bitsandbytes not available: {e}")
+            print("To use quantization, install bitsandbytes: pip install -U bitsandbytes")
+            print("Continuing without quantization...")
+            
+            # Retry without quantization
+            inference = Qwen3Inference(
+                model_name_or_path=args.model,
+                device=args.device,
+                torch_dtype=args.torch_dtype,
+                use_flash_attention=not args.no_flash_attention,
+                load_in_8bit=False,
+                load_in_4bit=False,
+                use_compile=args.use_compile,
+                compile_mode=args.compile_mode
+            )
+        else:
+            raise e
     
     if args.batch:
         # Batch mode

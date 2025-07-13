@@ -146,6 +146,7 @@ def example_memory_optimization():
     # Note: This requires more GPU memory and may not work on all systems
     
     try:
+        print("Attempting to load model with 8-bit quantization...")
         inference = Qwen3Inference(
             model_name_or_path=__lei_model_path__,
             device="auto",
@@ -165,9 +166,38 @@ def example_memory_optimization():
         
         print(f"Generated: {result}")
         
+    except ImportError as e:
+        print(f"Quantization failed - bitsandbytes not available: {e}")
+        print("To use quantization, install bitsandbytes: pip install -U bitsandbytes")
+        print("Continuing without quantization...")
+        
+        # Try without quantization
+        try:
+            inference = Qwen3Inference(
+                model_name_or_path=__lei_model_path__,
+                device="auto",
+                torch_dtype="auto",
+                load_in_8bit=False,
+                use_flash_attention=True
+            )
+            
+            prompt = "Explain the benefits of renewable energy."
+            print(f"Prompt: {prompt}")
+            
+            result = inference.generate(
+                prompt=prompt,
+                max_new_tokens=150,
+                temperature=0.7
+            )
+            
+            print(f"Generated (without quantization): {result}")
+            
+        except Exception as e2:
+            print(f"Model loading failed: {e2}")
+            
     except Exception as e:
-        print(f"Memory optimization example failed (likely due to insufficient GPU memory): {e}")
-        print("This is expected on systems with limited GPU memory.")
+        print(f"Memory optimization example failed: {e}")
+        print("This may be due to insufficient GPU memory or other system constraints.")
     print()
 
 

@@ -26,7 +26,12 @@ A comprehensive Python program for running inference with Qwen3 models, supporti
 ### Install Dependencies
 
 ```bash
-pip install torch transformers accelerate bitsandbytes
+pip install torch transformers accelerate
+```
+
+For quantization support:
+```bash
+pip install -U bitsandbytes
 ```
 
 For additional optimizations:
@@ -131,7 +136,14 @@ for prompt, result in zip(prompts, results):
 # For large models with limited GPU memory
 inference = Qwen3Inference(
     model_name_or_path="Qwen/Qwen3-235B-A22B",
-    load_in_8bit=True,  # 8-bit quantization
+    load_in_8bit=True,  # 8-bit quantization (requires bitsandbytes)
+    device="auto"
+)
+
+# 4-bit quantization for even more memory savings
+inference = Qwen3Inference(
+    model_name_or_path="Qwen/Qwen3-235B-A22B",
+    load_in_4bit=True,  # 4-bit quantization (requires bitsandbytes)
     device="auto"
 )
 ```
@@ -199,9 +211,14 @@ inference = Qwen3Inference("./models/Qwen3-8B")
 
 ### Optimization Tips
 
-1. **Use quantization** for large models:
+1. **Use quantization** for large models (requires bitsandbytes):
    ```python
    load_in_8bit=True  # or load_in_4bit=True
+   ```
+   
+   Note: Quantization requires the `bitsandbytes` library. Install with:
+   ```bash
+   pip install -U bitsandbytes
    ```
 
 2. **Enable flash attention** for better performance:
@@ -264,17 +281,22 @@ Write a poem about nature.
    - Enable quantization (`--load_in_8bit` or `--load_in_4bit`)
    - Reduce `max_new_tokens`
 
-2. **Slow Generation**
+2. **Quantization Errors**
+   - Install bitsandbytes: `pip install -U bitsandbytes`
+   - Check CUDA compatibility: `python -c "import bitsandbytes"`
+   - Use without quantization if issues persist
+
+3. **Slow Generation**
    - Use GPU if available
    - Enable flash attention
    - Use appropriate dtype
 
-3. **Model Loading Errors**
+4. **Model Loading Errors**
    - Check internet connection for Hugging Face models
    - Verify local model path exists
    - Ensure sufficient disk space
 
-4. **CUDA Errors**
+5. **CUDA Errors**
    - Update CUDA drivers
    - Check PyTorch CUDA compatibility
    - Use CPU fallback: `--device cpu`
