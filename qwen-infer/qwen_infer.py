@@ -19,6 +19,13 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig, 
 import warnings
 warnings.filterwarnings("ignore")
 
+try:
+    from top_k_attention import TopKAttention, TopKAttentionConfig, create_top_k_attention_layer
+except ImportError:
+    TopKAttention = None
+    TopKAttentionConfig = None
+    create_top_k_attention_layer = None
+
 __lei_model_path__ = r"D:\models\qwen3-0.6B"
 
 class Qwen3Inference:
@@ -35,7 +42,9 @@ class Qwen3Inference:
         load_in_4bit: bool = False,
         max_memory: Optional[Dict[str, str]] = None,
         use_compile: bool = False,
-        compile_mode: str = "default"
+        compile_mode: str = "default",
+        use_top_k_attention: bool = False,
+        top_k_attention_config: Optional[Any] = None
     ):
         """
         Initialize Qwen3 inference.
@@ -49,6 +58,10 @@ class Qwen3Inference:
             load_in_8bit: Whether to load model in 8-bit
             load_in_4bit: Whether to load model in 4-bit
             max_memory: Maximum memory allocation per device
+            use_compile: Whether to use torch.compile
+            compile_mode: torch.compile mode
+            use_top_k_attention: Whether to use top-k attention
+            top_k_attention_config: Configuration for top-k attention
         """
         self.model_name_or_path = model_name_or_path
         self.device = self._get_device(device)
@@ -113,6 +126,31 @@ class Qwen3Inference:
         if use_flash_attention and hasattr(self.model, "enable_flash_attention"):
             self.model.enable_flash_attention()
         
+        # Configure top-k attention if requested
+        self.use_top_k_attention = use_top_k_attention
+        self.top_k_attention_layers = {}
+        
+        if use_top_k_attention:
+            if TopKAttention is None:
+                print("Warning: Top-k attention not available. Please ensure top_k_attention.py is in the same directory.")
+                self.use_top_k_attention = False
+            else:
+                print("Setting up top-k attention...")
+                if top_k_attention_config is None:
+                    if TopKAttentionConfig is not None:
+                        top_k_attention_config = TopKAttentionConfig(k=32, temperature=1.0)
+                
+                self.top_k_attention_config = top_k_attention_config
+                if top_k_attention_config is not None:
+                    print(f"Top-k attention configured with k={top_k_attention_config.k}")
+                
+                # Apply top-k attention to model layers if supported
+                try:
+                    self._apply_top_k_attention()
+                except Exception as e:
+                    print(f"Warning: Failed to apply top-k attention: {e}")
+                    self.use_top_k_attention = False
+        
         # Apply torch.compile if requested
         if use_compile:
             print(f"Applying torch.compile with mode: {compile_mode}")
@@ -124,6 +162,41 @@ class Qwen3Inference:
                 print("Continuing without compilation...")
         
         print("Model loaded successfully!")
+    
+    def _apply_top_k_attention(self):
+        """Apply top-k attention to model layers."""
+        if not self.use_top_k_attention or TopKAttention is None:
+            return
+        
+        print("Applying top-k attention to model layers...")
+        
+        # For now, this is a placeholder implementation
+        # In a real implementation, you would need to:
+        # 1. Identify attention layers in the model
+        # 2. Replace them with TopKAttention layers
+        # 3. Handle state dict loading/saving
+        
+        # Example approach (commented out as it's model-specific):
+        # for name, module in self.model.named_modules():
+        #     if hasattr(module, 'attention') or 'attn' in name.lower():
+        #         # Replace with TopKAttention
+        #         pass
+        
+        print("Top-k attention application completed (placeholder)")
+    
+    def get_top_k_attention_stats(self) -> Dict[str, Any]:
+        """Get statistics from top-k attention layers."""
+        if not self.use_top_k_attention:
+            return {"top_k_attention_enabled": False}
+        
+        stats = {"top_k_attention_enabled": True}
+        
+        # Collect stats from all top-k attention layers
+        for layer_name, layer in self.top_k_attention_layers.items():
+            if hasattr(layer, 'get_memory_stats'):
+                stats[layer_name] = layer.get_memory_stats()
+        
+        return stats
     
     def _display_model_config(self, model_path: str):
         """Display model configuration information."""
@@ -485,11 +558,28 @@ def main():
     parser.add_argument("--compile_mode", type=str, default="default", 
                        choices=["default", "reduce-overhead", "max-autotune"],
                        help="torch.compile mode (default, reduce-overhead, max-autotune)")
+    parser.add_argument("--use_top_k_attention", action="store_true", 
+                       help="Enable top-k attention for memory efficiency")
+    parser.add_argument("--top_k_attention_k", type=int, default=32, 
+                       help="Number of top positions to attend to in top-k attention")
+    parser.add_argument("--top_k_attention_temperature", type=float, default=1.0, 
+                       help="Temperature for top-k attention scores")
+    parser.add_argument("--top_k_attention_sparse", action="store_true", 
+                       help="Use sparse tensors in top-k attention (experimental)")
     
     args = parser.parse_args()
     
     # Initialize inference
     try:
+        # Create top-k attention config if requested
+        top_k_config = None
+        if args.use_top_k_attention and TopKAttentionConfig is not None:
+            top_k_config = TopKAttentionConfig(
+                k=args.top_k_attention_k,
+                temperature=args.top_k_attention_temperature,
+                use_sparse=args.top_k_attention_sparse
+            )
+        
         inference = Qwen3Inference(
             model_name_or_path=args.model,
             device=args.device,
@@ -498,7 +588,9 @@ def main():
             load_in_8bit=args.load_in_8bit,
             load_in_4bit=args.load_in_4bit,
             use_compile=args.use_compile,
-            compile_mode=args.compile_mode
+            compile_mode=args.compile_mode,
+            use_top_k_attention=args.use_top_k_attention,
+            top_k_attention_config=top_k_config
         )
     except ImportError as e:
         if args.load_in_8bit or args.load_in_4bit:
@@ -545,6 +637,13 @@ def main():
             end_time = time.time()
             
             print(f"\nGeneration completed in {end_time - start_time:.2f} seconds")
+            
+            # Display top-k attention stats if enabled
+            if args.use_top_k_attention:
+                stats = inference.get_top_k_attention_stats()
+                if stats.get("top_k_attention_enabled", False):
+                    print(f"\nTop-k Attention Stats: {stats}")
+            
             print("\nResults:")
             for i, (prompt, result) in enumerate(zip(prompts, results)):
                 print(f"\n--- Prompt {i+1} ---")
@@ -569,7 +668,14 @@ def main():
         
         if not args.stream:
             print(f"Output: {result}")
+        
         print(f"\nGeneration completed in {end_time - start_time:.2f} seconds")
+        
+        # Display top-k attention stats if enabled
+        if args.use_top_k_attention:
+            stats = inference.get_top_k_attention_stats()
+            if stats.get("top_k_attention_enabled", False):
+                print(f"\nTop-k Attention Stats: {stats}")
 
 
 if __name__ == "__main__":
