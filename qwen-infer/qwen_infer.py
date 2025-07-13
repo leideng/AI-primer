@@ -52,11 +52,14 @@ class Qwen3Inference:
         """
         self.model_name_or_path = model_name_or_path
         self.device = self._get_device(device)
-        self.torch_dtype = self._get_torch_dtype(torch_dtype)
+        self.torch_dtype = self._get_torch_dtype(torch_dtype, model_name_or_path)
         
         print(f"Loading model: {model_name_or_path}")
         print(f"Device: {self.device}")
         print(f"Torch dtype: {self.torch_dtype}")
+        
+        # Display model config info if available
+        self._display_model_config(model_name_or_path)
         
         # Load tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -108,6 +111,27 @@ class Qwen3Inference:
         
         print("Model loaded successfully!")
     
+    def _display_model_config(self, model_path: str):
+        """Display model configuration information."""
+        try:
+            import json
+            import os
+            config_path = os.path.join(model_path, "config.json")
+            if os.path.exists(config_path):
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                
+                print("Model config:")
+                print(f"  - Model type: {config.get('model_type', 'unknown')}")
+                print(f"  - Architecture: {config.get('architectures', ['unknown'])[0] if config.get('architectures') else 'unknown'}")
+                print(f"  - Hidden size: {config.get('hidden_size', 'unknown')}")
+                print(f"  - Num layers: {config.get('num_hidden_layers', 'unknown')}")
+                print(f"  - Vocab size: {config.get('vocab_size', 'unknown')}")
+                if "torch_dtype" in config:
+                    print(f"  - Torch dtype: {config['torch_dtype']}")
+        except Exception as e:
+            print(f"Could not read model config: {e}")
+    
     def _get_device(self, device: str) -> str:
         """Determine the best device to use."""
         if device == "auto":
@@ -119,9 +143,40 @@ class Qwen3Inference:
                 return "cpu"
         return device
     
-    def _get_torch_dtype(self, torch_dtype: str) -> torch.dtype:
-        """Convert torch_dtype string to torch.dtype."""
+    def _get_torch_dtype(self, torch_dtype: str, model_path: str = None) -> torch.dtype:
+        """Convert torch_dtype string to torch.dtype, with fallback to config.json."""
         if torch_dtype == "auto":
+            # Try to read dtype from config.json first
+            if model_path:
+                try:
+                    import json
+                    import os
+                    config_path = os.path.join(model_path, "config.json")
+                    if os.path.exists(config_path):
+                        with open(config_path, 'r') as f:
+                            config = json.load(f)
+                        
+                        # Check for torch_dtype in config
+                        if "torch_dtype" in config:
+                            dtype_str = config["torch_dtype"]
+                            if dtype_str == "float16":
+                                return torch.float16
+                            elif dtype_str == "bfloat16":
+                                return torch.bfloat16
+                            elif dtype_str == "float32":
+                                return torch.float32
+                        
+                        # Check for model_type and use appropriate dtype
+                        model_type = config.get("model_type", "")
+                        if "qwen" in model_type.lower():
+                            if torch.cuda.is_available():
+                                return torch.float16
+                            else:
+                                return torch.float32
+                except Exception as e:
+                    print(f"Warning: Could not read config.json: {e}")
+            
+            # Fallback to device-based selection
             if torch.cuda.is_available():
                 return torch.float16
             else:

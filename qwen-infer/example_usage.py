@@ -108,7 +108,7 @@ def example_different_parameters():
     print("=== Different Parameters Example ===")
     
     inference = Qwen3Inference(
-        model_name_or_path=my_model_path,
+        model_name_or_path=__lei_model_path__,
         device="auto",
         torch_dtype="auto"
     )
@@ -313,10 +313,9 @@ def main():
     #example_memory_optimization()
     #example_custom_model_path()
     example_torch_compile()
-    example_compile_modes()
+    #example_compile_modes()
     
     print("All examples completed!")
-
 
 if __name__ == "__main__":
     main() 
