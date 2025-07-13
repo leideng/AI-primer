@@ -168,20 +168,20 @@ inference = Qwen3Inference("./models/Qwen2.5-7B-Instruct")
 
 ### Available Models
 
-- `Qwen/Qwen2.5-0.5B-Instruct` - Smallest model (0.5B parameters)
-- `Qwen/Qwen2.5-1.5B-Instruct` - Small model (1.5B parameters)
-- `Qwen/Qwen2.5-3B-Instruct` - Medium model (3B parameters)
-- `Qwen/Qwen2.5-7B-Instruct` - Large model (7B parameters)
-- `Qwen/Qwen2.5-14B-Instruct` - Very large model (14B parameters)
-- `Qwen/Qwen2.5-32B-Instruct` - Huge model (32B parameters)
-- `Qwen/Qwen2.5-72B-Instruct` - Massive model (72B parameters)
+- `Qwen/Qwen3-0.6B-Instruct` - Smallest model (0.6B parameters)
+- `Qwen/Qwen3-1.7B-Instruct` - Small model (1.7B parameters)
+- `Qwen/Qwen3-8B-Instruct` - Medium model (8B parameters)
+- `Qwen/Qwen3-14B-Instruct` - Large model (14B parameters)
+- `Qwen/Qwen3-32B-Instruct` - Huge model (32B parameters)
+- `Qwen/Qwen3-30B-A3B-Instruct` - Advanced model (30B parameters, A3B architecture)
+- `Qwen/Qwen3-235B-A22B-Instruct` - Massive model (235B parameters, A22B architecture)
 
 ### Model Selection Guide
 
-- **Development/Testing**: Use 0.5B or 1.5B models
-- **Production (Limited GPU)**: Use 3B or 7B models with quantization
-- **Production (High-end GPU)**: Use 14B or 32B models
-- **Research/Enterprise**: Use 72B model with multiple GPUs
+- **Development/Testing**: Use 0.6B or 1.7B models
+- **Production (Limited GPU)**: Use 8B or 14B models with quantization
+- **Production (High-end GPU)**: Use 32B or 30B-A3B models
+- **Research/Enterprise**: Use 235B-A22B model with multiple GPUs
 
 ## Performance Optimization
 
@@ -189,13 +189,13 @@ inference = Qwen3Inference("./models/Qwen2.5-7B-Instruct")
 
 | Model Size | FP16 | 8-bit | 4-bit |
 |------------|------|-------|-------|
-| 0.5B | 1GB | 0.5GB | 0.25GB |
-| 1.5B | 3GB | 1.5GB | 0.75GB |
-| 3B | 6GB | 3GB | 1.5GB |
-| 7B | 14GB | 7GB | 3.5GB |
+| 0.6B | 1.2GB | 0.6GB | 0.3GB |
+| 1.7B | 3.4GB | 1.7GB | 0.85GB |
+| 8B | 16GB | 8GB | 4GB |
 | 14B | 28GB | 14GB | 7GB |
 | 32B | 64GB | 32GB | 16GB |
-| 72B | 144GB | 72GB | 36GB |
+| 30B-A3B | 60GB | 30GB | 15GB |
+| 235B-A22B | 470GB | 235GB | 117.5GB |
 
 ### Optimization Tips
 
