@@ -64,7 +64,8 @@ class Qwen3Inference:
         # Load tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_name_or_path,
-            trust_remote_code=trust_remote_code
+            trust_remote_code=trust_remote_code,
+            padding_side='left'  # Fix the padding warning
         )
         
         # Set pad token if not set
@@ -114,21 +115,40 @@ class Qwen3Inference:
     def _display_model_config(self, model_path: str):
         """Display model configuration information."""
         try:
-            import json
-            import os
-            config_path = os.path.join(model_path, "config.json")
-            if os.path.exists(config_path):
-                with open(config_path, 'r') as f:
-                    config = json.load(f)
+            from transformers import AutoConfig
+            
+            # Try HuggingFace first (for models like "Qwen/Qwen3-8B")
+            try:
+                config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
                 
                 print("Model config:")
-                print(f"  - Model type: {config.get('model_type', 'unknown')}")
-                print(f"  - Architecture: {config.get('architectures', ['unknown'])[0] if config.get('architectures') else 'unknown'}")
-                print(f"  - Hidden size: {config.get('hidden_size', 'unknown')}")
-                print(f"  - Num layers: {config.get('num_hidden_layers', 'unknown')}")
-                print(f"  - Vocab size: {config.get('vocab_size', 'unknown')}")
-                if "torch_dtype" in config:
-                    print(f"  - Torch dtype: {config['torch_dtype']}")
+                print(f"  - Model type: {getattr(config, 'model_type', 'unknown')}")
+                print(f"  - Architecture: {getattr(config, 'architectures', ['unknown'])[0] if hasattr(config, 'architectures') and config.architectures else 'unknown'}")
+                print(f"  - Hidden size: {getattr(config, 'hidden_size', 'unknown')}")
+                print(f"  - Num layers: {getattr(config, 'num_hidden_layers', 'unknown')}")
+                print(f"  - Vocab size: {getattr(config, 'vocab_size', 'unknown')}")
+                if hasattr(config, 'torch_dtype') and config.torch_dtype is not None:
+                    print(f"  - Torch dtype: {config.torch_dtype}")
+            except Exception as e:
+                # If HuggingFace fails, try local path
+                try:
+                    import json
+                    import os
+                    config_path = os.path.join(model_path, "config.json")
+                    if os.path.exists(config_path):
+                        with open(config_path, 'r') as f:
+                            config = json.load(f)
+                        
+                        print("Model config:")
+                        print(f"  - Model type: {config.get('model_type', 'unknown')}")
+                        print(f"  - Architecture: {config.get('architectures', ['unknown'])[0] if config.get('architectures') else 'unknown'}")
+                        print(f"  - Hidden size: {config.get('hidden_size', 'unknown')}")
+                        print(f"  - Num layers: {config.get('num_hidden_layers', 'unknown')}")
+                        print(f"  - Vocab size: {config.get('vocab_size', 'unknown')}")
+                        if "torch_dtype" in config:
+                            print(f"  - Torch dtype: {config['torch_dtype']}")
+                except Exception as local_e:
+                    print(f"Could not load config from HuggingFace or local path: {e}, {local_e}")
         except Exception as e:
             print(f"Could not read model config: {e}")
     
@@ -151,28 +171,46 @@ class Qwen3Inference:
                 try:
                     import json
                     import os
-                    config_path = os.path.join(model_path, "config.json")
-                    if os.path.exists(config_path):
-                        with open(config_path, 'r') as f:
-                            config = json.load(f)
-                        
-                        # Check for torch_dtype in config
-                        if "torch_dtype" in config:
-                            dtype_str = config["torch_dtype"]
-                            if dtype_str == "float16":
+                    from transformers import AutoConfig
+                    
+                    # Try HuggingFace first (for models like "Qwen/Qwen3-8B")
+                    try:
+                        config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)
+                        if hasattr(config, 'torch_dtype') and config.torch_dtype is not None:
+                            dtype_str = str(config.torch_dtype)
+                            if "float16" in dtype_str:
                                 return torch.float16
-                            elif dtype_str == "bfloat16":
+                            elif "bfloat16" in dtype_str:
                                 return torch.bfloat16
-                            elif dtype_str == "float32":
+                            elif "float32" in dtype_str:
                                 return torch.float32
-                        
-                        # Check for model_type and use appropriate dtype
-                        model_type = config.get("model_type", "")
-                        if "qwen" in model_type.lower():
-                            if torch.cuda.is_available():
-                                return torch.float16
-                            else:
-                                return torch.float32
+                    except Exception as e:
+                        # If HuggingFace fails, try local path
+                        try:
+                            config_path = os.path.join(model_path, "config.json")
+                            if os.path.exists(config_path):
+                                with open(config_path, 'r') as f:
+                                    config = json.load(f)
+                                
+                                # Check for torch_dtype in config
+                                if "torch_dtype" in config:
+                                    dtype_str = config["torch_dtype"]
+                                    if dtype_str == "float16":
+                                        return torch.float16
+                                    elif dtype_str == "bfloat16":
+                                        return torch.bfloat16
+                                    elif dtype_str == "float32":
+                                        return torch.float32
+                        except Exception as local_e:
+                            print(f"Warning: Could not load config from HuggingFace or local path: {e}, {local_e}")
+                    
+                    # Check for model_type and use appropriate dtype
+                    model_type = config.get("model_type", "") if isinstance(config, dict) else getattr(config, 'model_type', "")
+                    if "qwen" in model_type.lower():
+                        if torch.cuda.is_available():
+                            return torch.float16
+                        else:
+                            return torch.float32
                 except Exception as e:
                     print(f"Warning: Could not read config.json: {e}")
             
@@ -233,6 +271,7 @@ class Qwen3Inference:
             do_sample=do_sample,
             pad_token_id=self.tokenizer.pad_token_id,
             eos_token_id=self.tokenizer.eos_token_id,
+            bos_token_id=self.tokenizer.bos_token_id,
             **kwargs
         )
         
@@ -375,6 +414,7 @@ class Qwen3Inference:
             do_sample=do_sample,
             pad_token_id=self.tokenizer.pad_token_id,
             eos_token_id=self.tokenizer.eos_token_id,
+            bos_token_id=self.tokenizer.bos_token_id,
             **kwargs
         )
         

@@ -308,11 +308,11 @@ def main():
     # Run examples
     #example_basic_usage()
     #example_streaming()
-    #example_batch_generation()
+    example_batch_generation()
     #example_different_parameters()
     #example_memory_optimization()
     #example_custom_model_path()
-    example_torch_compile()
+    #example_torch_compile()
     #example_compile_modes()
     
     print("All examples completed!")
