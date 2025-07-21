@@ -14,8 +14,28 @@ class GroupedQueryAttention(nn.Module):
         self.head_dim = embed_dim // num_heads # Dimension of each attention head
         self.group_size = self.num_heads // self.num_kv_heads # How many query heads share one KV head
 
-        # Linear projections for Query, Key, and Value
-        # Q projection: maps embed_dim to num_heads * head_dim, we will later 
+        # --- Conceptual View (Separate Matrices) ---
+        # Imagine you have N query heads. Conceptually, you could think of having N separate nn.Linear layers,
+        # each taking the input embedding and projecting it down to head_dim dimensions.
+        # Q1 = Input @ W_Q1
+        # Q2 = Input @ W_Q2
+        # ...
+        # QN = Input @ W_QN
+        # Where W_Q1, W_Q2, ..., W_QN are all different projection matrices.
+
+        # --- Practical PyTorch Implementation (Single Large Matrix) ---
+        # In practice, for efficiency, this is almost always implemented using a single large nn.Linear layer
+        # that projects the input embed_dim into num_heads * head_dim dimensions.
+        # q_proj = nn.Linear(embed_dim, num_heads * head_dim)
+        # all_q_projections = q_proj(input) (shape: batch_size, seq_len, num_heads * head_dim)
+        # Then, this all_q_projections tensor is reshaped to separate out the individual heads:
+        # q = all_q_projections.view(batch_size, seq_len, num_heads, head_dim)
+        # When you do this view operation, each slice along the num_heads dimension (e.g., q[:, :, 0, :], q[:, :, 1, :], etc.)
+        # corresponds to the query representation for a specific head. Even though it came from a single large linear layer,
+        # the weights within that layer are structured such that different parts of the output correspond to different heads.
+        # It's as if the single large W_Q matrix is implicitly composed of N smaller W_Qi sub-matrices.
+
+        # Q projection: maps embed_dim to num_heads * head_dim.
         self.q_proj = nn.Linear(embed_dim, self.num_heads * self.head_dim, bias=False)
         # K projection: maps embed_dim to num_kv_heads * head_dim
         self.k_proj = nn.Linear(embed_dim, self.num_kv_heads * self.head_dim, bias=False)
@@ -31,13 +51,26 @@ class GroupedQueryAttention(nn.Module):
         batch_size, seq_len, _ = query.size()
 
         # 1. Project Q, K, V
+        # --- Query Projection Detailed Explanation ---
         # Apply linear projections and reshape to separate heads
-        # Q: (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, num_heads, head_dim)
-        q = self.q_proj(query).view(batch_size, seq_len, self.num_heads, self.head_dim)
+        # Q: (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, num_heads * head_dim)
+        all_q_projections = self.q_proj(query)
+        print(f"[Q PROJ] all_q_projections shape: {all_q_projections.shape} (should be [batch, seq_len, num_heads * head_dim])")
+        # Reshape to (batch_size, seq_len, num_heads, head_dim)
+        q = all_q_projections.view(batch_size, seq_len, self.num_heads, self.head_dim)
+        print(f"[Q PROJ] q shape after view: {q.shape} (should be [batch, seq_len, num_heads, head_dim])")
+        # Show a slice for the first token and first batch
+        print(f"[Q PROJ] q[0, 0, :, :] shape: {q[0, 0, :, :].shape} (should be [num_heads, head_dim])")
+        print(f"[Q PROJ] q[0, 0, 0, :5]: {q[0, 0, 0, :5].detach().cpu().numpy()} (first 5 dims of head 0)")
+        print(f"[Q PROJ] q[0, 0, 1, :5]: {q[0, 0, 1, :5].detach().cpu().numpy()} (first 5 dims of head 1)")
+        # Each q[batch, seq, h, :] is as if it was produced by a separate W_Qh matrix
+
         # K: (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, num_kv_heads, head_dim)
-        k = self.k_proj(key).view(batch_size, seq_len, self.num_kv_heads, self.head_dim)
+        all_k_projections = self.k_proj(key)
+        k = all_k_projections.view(batch_size, seq_len, self.num_kv_heads, self.head_dim)
         # V: (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, num_kv_heads, head_dim)
-        v = self.v_proj(value).view(batch_size, seq_len, self.num_kv_heads, self.head_dim)
+        all_v_projections = self.v_proj(value)
+        v = all_v_projections.view(batch_size, seq_len, self.num_kv_heads, self.head_dim)
 
         # 2. Transpose for attention calculation
         # Change shape to (batch_size, num_heads/num_kv_heads, seq_len, head_dim)
@@ -46,19 +79,25 @@ class GroupedQueryAttention(nn.Module):
         k = k.transpose(1, 2) # (batch_size, num_kv_heads, seq_len, head_dim)
         v = v.transpose(1, 2) # (batch_size, num_kv_heads, seq_len, head_dim)
 
+        print(f"[Q PROJ] q shape after transpose: {q.shape} (should be [batch, num_heads, seq_len, head_dim])")
+        print(f"[K PROJ] k shape after transpose: {k.shape} (should be [batch, num_kv_heads, seq_len, head_dim])")
+        print(f"[V PROJ] v shape after transpose: {v.shape} (should be [batch, num_kv_heads, seq_len, head_dim])")
+
         # 3. Repeat K and V heads to match the number of query heads
         # This is the core of GQA: each KV head is shared by `group_size` query heads.
         # We effectively duplicate the KV heads so that each query head has a corresponding KV head to attend to.
         # k: (batch_size, num_kv_heads, seq_len, head_dim) -> (batch_size, num_heads, seq_len, head_dim)
         k = k.repeat_interleave(self.group_size, dim=1)
-        # v: (batch_size, num_kv_heads, seq_len, head_dim) -> (batch_size, num_heads, seq_len, head_dim)
         v = v.repeat_interleave(self.group_size, dim=1)
+        print(f"[K/V REPEAT] k shape after repeat_interleave: {k.shape} (should be [batch, num_heads, seq_len, head_dim])")
+        print(f"[K/V REPEAT] v shape after repeat_interleave: {v.shape} (should be [batch, num_heads, seq_len, head_dim])")
 
         # 4. Scaled Dot-Product Attention
         # Calculate attention scores: Q @ K_T / sqrt(head_dim)
         # (batch_size, num_heads, seq_len, head_dim) @ (batch_size, num_heads, head_dim, seq_len)
         # -> (batch_size, num_heads, seq_len, seq_len)
         attn_scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim ** 0.5)
+        print(f"[ATTN SCORES] attn_scores shape: {attn_scores.shape} (should be [batch, num_heads, seq_len, seq_len])")
 
         # Apply attention mask if provided (e.g., for causal masking in LLMs)
         if attn_mask is not None:
@@ -74,15 +113,18 @@ class GroupedQueryAttention(nn.Module):
         # (batch_size, num_heads, seq_len, seq_len) @ (batch_size, num_heads, seq_len, head_dim)
         # -> (batch_size, num_heads, seq_len, head_dim)
         output = torch.matmul(attn_weights, v)
+        print(f"[OUTPUT] output shape after attention: {output.shape} (should be [batch, num_heads, seq_len, head_dim])")
 
         # 6. Concatenate heads and apply final linear projection
         # Transpose back to (batch_size, seq_len, num_heads, head_dim)
         # Then flatten the last two dimensions to (batch_size, seq_len, num_heads * head_dim)
         output = output.transpose(1, 2).contiguous().view(batch_size, seq_len, self.num_heads * self.head_dim)
+        print(f"[OUTPUT] output shape after transpose+view: {output.shape} (should be [batch, seq_len, num_heads * head_dim])")
         
         # Apply the final output projection layer
         # (batch_size, seq_len, num_heads * head_dim) -> (batch_size, seq_len, embed_dim)
         output = self.out_proj(output)
+        print(f"[OUTPUT] Final output shape: {output.shape} (should be [batch, seq_len, embed_dim])\n")
 
         return output
 
