@@ -1,4 +1,4 @@
- config.json:  4.76k/? [00:00<00:00, 310kB/s]pytorch_model.bin: 100% 1.71G/1.71G [00:31<00:00, 67.0MB/s]model.safetensors:   4% 67.6M/1.71G [00:04<01:35, 17.1MB/s]--- Model Architecture ---
+--- Model Architecture ---
 CLIPModel(
   (text_model): CLIPTextTransformer(
     (embeddings): CLIPTextEmbeddings(
