@@ -4,3 +4,4 @@
 - https://developer.nvidia.com/blog/tuning-flash-attention-for-peak-performance-in-nvidia-cuda-tile/
 - https://googlecloudplatform.github.io/vertex-ai-samples/vertex-training-cluster/model_distillation_best_practices
 - https://lilianweng.github.io/posts/2018-02-19-rl-overview/
+- Fully training logs of Olmo Hybrid https://allenai.org/blog/olmohybrid
