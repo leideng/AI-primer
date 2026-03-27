@@ -5,3 +5,4 @@
 - https://googlecloudplatform.github.io/vertex-ai-samples/vertex-training-cluster/model_distillation_best_practices
 - https://lilianweng.github.io/posts/2018-02-19-rl-overview/
 - Fully training logs of Olmo Hybrid https://allenai.org/blog/olmohybrid
+- https://blog.fsck.com/2025/10/05/how-im-using-coding-agents-in-september-2025/
