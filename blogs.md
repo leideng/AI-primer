@@ -7,3 +7,4 @@
 - Fully training logs of Olmo Hybrid https://allenai.org/blog/olmohybrid
 - https://blog.fsck.com/2025/10/05/how-im-using-coding-agents-in-september-2025/
 - Claude Code 源码泄露：一份价值亿元的 AI 工程公开课 https://developer.aliyun.com/article/1722081
+- paperclip for paper search cli: https://gxl.ai/blog/paperclip
