@@ -9,3 +9,4 @@
 - Claude Code 源码泄露：一份价值亿元的 AI 工程公开课 https://developer.aliyun.com/article/1722081
 - paperclip for paper search cli: https://gxl.ai/blog/paperclip
 - SGLang HiSparse: https://www.lmsys.org/blog/2026-04-10-sglang-hisparse/
+- Databricks Memory Scaling for AI Agents: https://www.databricks.com/blog/memory-scaling-ai-agents
