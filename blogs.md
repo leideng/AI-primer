@@ -11,3 +11,4 @@
 - SGLang HiSparse: https://www.lmsys.org/blog/2026-04-10-sglang-hisparse/
 - Databricks Memory Scaling for AI Agents: https://www.databricks.com/blog/memory-scaling-ai-agents
 - An Intro to DeepSeek's Distributed File System https://maknee.github.io/blog/2025/3FS-Performance-Journal-1/
+- Thinking with Visual Primitives https://github.com/deepseek-ai/Thinking-with-Visual-Primitives/blob/main/Thinking_with_Visual_Primitives.pdf
