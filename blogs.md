@@ -13,3 +13,4 @@
 - An Intro to DeepSeek's Distributed File System https://maknee.github.io/blog/2025/3FS-Performance-Journal-1/
 - Thinking with Visual Primitives https://github.com/deepseek-ai/Thinking-with-Visual-Primitives/blob/main/Thinking_with_Visual_Primitives.pdf
 - How AI Will Reshape Computer Systems by 2035 https://cra.org/industry/2026/04/27/how-ai-will-reshape-computer-systems-by-2035-a-jeffersonian-dinner-in-san-francisco-about-our-10000x-future/
+- LightSeek SMG Clients → Gateway → Router → Workers https://pytorch.org/blog/lightseek-smg/
