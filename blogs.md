@@ -15,4 +15,5 @@
 - How AI Will Reshape Computer Systems by 2035 https://cra.org/industry/2026/04/27/how-ai-will-reshape-computer-systems-by-2035-a-jeffersonian-dinner-in-san-francisco-about-our-10000x-future/
 - LightSeek SMG Clients → Gateway → Router → Workers https://pytorch.org/blog/lightseek-smg/
 - Sparser, Faster, Lighter Transformer Language Models https://pub.sakana.ai/sparser-faster-llms/
-- The Founder’s Playbook: Building an AI-Native Startup https://claude.com/blog/the-founders-playbook 
+- The Founder’s Playbook: Building an AI-Native Startup https://claude.com/blog/the-founders-playbook
+- Builds AI that builds AI https://sakana.ai/rsi-lab/ 
