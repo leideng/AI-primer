@@ -16,4 +16,5 @@
 - LightSeek SMG Clients → Gateway → Router → Workers https://pytorch.org/blog/lightseek-smg/
 - Sparser, Faster, Lighter Transformer Language Models https://pub.sakana.ai/sparser-faster-llms/
 - The Founder’s Playbook: Building an AI-Native Startup https://claude.com/blog/the-founders-playbook
-- Builds AI that builds AI https://sakana.ai/rsi-lab/ 
+- Builds AI that builds AI https://sakana.ai/rsi-lab/
+- MAI-Thinking-1 https://microsoft.ai/pdf/mai-thinking-1.pdf
