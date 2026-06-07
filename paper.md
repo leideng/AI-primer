@@ -1,0 +1,2 @@
+- The Coverage Principle: How Pre-Training Enables Post-Training, ICLR 2026, https://arxiv.org/pdf/2510.15020
+- On the Generalization of SFT: A Reinforcement Learning Perspective with Reward Rectification, ICLR 2026, https://arxiv.org/pdf/2508.05629
