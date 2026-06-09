@@ -1,2 +1,3 @@
 - The Coverage Principle: How Pre-Training Enables Post-Training, ICLR 2026, https://arxiv.org/pdf/2510.15020
 - On the Generalization of SFT: A Reinforcement Learning Perspective with Reward Rectification, ICLR 2026, https://arxiv.org/pdf/2508.05629
+- CWM: An Open-Weights LLM for Research on Code Generation with World Models https://arxiv.org/pdf/2510.02387
