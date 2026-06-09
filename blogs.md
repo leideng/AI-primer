@@ -19,3 +19,4 @@
 - Builds AI that builds AI https://sakana.ai/rsi-lab/
 - MAI-Thinking-1 https://microsoft.ai/pdf/mai-thinking-1.pdf
 - Alignment is not solved by Jan Leike https://aligned.substack.com/p/alignment-is-not-solved-but-increasingly-looks-solvable
+- A Functional Taxonomy of World Models by Fei-Fei Li https://drfeifei.substack.com/p/a-functional-taxonomy-of-world-models 
