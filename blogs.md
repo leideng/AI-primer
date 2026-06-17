@@ -21,4 +21,5 @@
 - Alignment is not solved by Jan Leike https://aligned.substack.com/p/alignment-is-not-solved-but-increasingly-looks-solvable
 - A Functional Taxonomy of World Models by Fei-Fei Li https://drfeifei.substack.com/p/a-functional-taxonomy-of-world-models
 - On-Policy Distillation https://thinkingmachines.ai/blog/on-policy-distillation/
-- SFT, RL, and On-Policy Distillation Through a Distributional Lens https://nrehiew.github.io/blog/sft_rl_opd/ 
+- SFT, RL, and On-Policy Distillation Through a Distributional Lens https://nrehiew.github.io/blog/sft_rl_opd/
+- Google OKF (Open Knowledge Format), https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing/ 
