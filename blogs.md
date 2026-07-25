@@ -26,4 +26,5 @@
 - Agentic coding and persistent returns to expertise https://www.anthropic.com/research/claude-code-expertise
 - LongCat 2.0 uses both MLA and DSA https://huggingface.co/meituan-longcat/LongCat-2.0-FP8/blob/main/config.json
 - Mathematics in the age of AI, ICM 2026, Terence Tao, https://github.com/teorth/tao-web/blob/main/static/slides/age-of-ai-icm-2026.pdf "my suggested rule of thumb: if the authors cannot convincingly demonstrate that they can give a clear, expert-level talk on their results, that is correct and properly attributed, then the result should not be published."
+- Science: A New Golden Age https://www.whitehouse.gov/wp-content/uploads/2026/07/Science-A-New-Golden-Age.pdf 
   
