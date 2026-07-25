@@ -25,3 +25,5 @@
 - Google OKF (Open Knowledge Format), https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing/
 - Agentic coding and persistent returns to expertise https://www.anthropic.com/research/claude-code-expertise
 - LongCat 2.0 uses both MLA and DSA https://huggingface.co/meituan-longcat/LongCat-2.0-FP8/blob/main/config.json
+- Mathematics in the age of AI, ICM 2026, Terence Tao, https://github.com/teorth/tao-web/blob/main/static/slides/age-of-ai-icm-2026.pdf "my suggested rule of thumb: if the authors cannot convincingly demonstrate that they can give a clear, expert-level talk on their results, that is correct and properly attributed, then the result should not be published."
+  
